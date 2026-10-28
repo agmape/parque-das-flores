@@ -27,18 +27,26 @@ export type TrackingParams = {
 
 type DataLayerWindow = Window & { dataLayer?: unknown[] };
 
-const PII_KEYS = /nome|name|email|e-mail|telefone|phone|cpf|whats/i;
+// Somente estes parâmetros podem ir para o dataLayer (lista fechada).
+const ALLOWED_KEYS = new Set<string>([
+  "cta_name",
+  "form_name",
+  "contact_method",
+  "content_name",
+  "content_type",
+  "link_url",
+]);
 
 function sanitize(params: TrackingParams): Record<string, string> {
   const clean: Record<string, string> = {};
   for (const [key, value] of Object.entries(params)) {
+    if (!ALLOWED_KEYS.has(key)) continue;
     if (value === undefined || value === null || value === "") continue;
     const text = String(value).slice(0, 120);
     // Proteção extra: descarta valores com cara de e-mail ou telefone.
     const looksLikeEmail = /@/.test(text);
     const looksLikePhone = key !== "link_url" && /\d{8,}/.test(text.replace(/\D/g, ""));
     if (looksLikeEmail || looksLikePhone) continue;
-    if (PII_KEYS.test(key) && key !== "contact_method") continue;
     clean[key] = text;
   }
   return clean;

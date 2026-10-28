@@ -109,14 +109,14 @@ export function Contato() {
             Deixe seus dados para receber informações ou agendar uma visita. Quem atende é{" "}
             {CONTACT_NAME}.
           </p>
-          <ul className="mt-8 space-y-4 text-base">
+          <ul className="mt-8 space-y-1 text-base">
             <li>
               <a
                 href={whatsappLink("Olá! Quero atendimento sobre os lotes do Parque das Flores.")}
                 target="_blank"
                 rel="noopener noreferrer"
                 data-cta="contato_whatsapp"
-                className="inline-flex items-center gap-3 font-medium text-primary hover:text-leaf"
+                className="inline-flex min-h-11 items-center gap-3 font-medium text-primary hover:text-leaf"
               >
                 <MessageCircle className="size-5 text-leaf" aria-hidden /> WhatsApp{" "}
                 {WHATSAPP_DISPLAY}
@@ -126,7 +126,7 @@ export function Contato() {
               <a
                 href={`tel:${PHONE_TEL}`}
                 data-cta="contato_telefone"
-                className="inline-flex items-center gap-3 font-medium text-primary hover:text-leaf"
+                className="inline-flex min-h-11 items-center gap-3 font-medium text-primary hover:text-leaf"
               >
                 <Phone className="size-5 text-leaf" aria-hidden /> Ligar para {WHATSAPP_DISPLAY}
               </a>
@@ -138,7 +138,7 @@ export function Contato() {
                   "Olá! Gostaria de mais informações sobre os lotes do Parque das Flores em Sacramento-MG.",
                 )}
                 data-cta="contato_email"
-                className="inline-flex min-w-0 items-center gap-3 font-medium text-primary hover:text-leaf"
+                className="inline-flex min-h-11 min-w-0 items-center gap-3 font-medium text-primary hover:text-leaf"
               >
                 <Mail className="size-5 shrink-0 text-leaf" aria-hidden />
                 <span className="break-all">{CONTACT_EMAIL}</span>

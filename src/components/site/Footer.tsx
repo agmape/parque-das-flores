@@ -36,10 +36,10 @@ export function Footer() {
           <div className="grid gap-8 sm:grid-cols-2">
             <nav aria-label="Rodapé">
               <p className="text-sm font-semibold text-cream">Navegue</p>
-              <ul className="mt-3 space-y-2 text-base">
+              <ul className="mt-2 text-base">
                 {nav.map(([href, label]) => (
                   <li key={href}>
-                    <a href={href} className="hover:text-cream">
+                    <a href={href} className="inline-flex min-h-11 items-center hover:text-cream">
                       {label}
                     </a>
                   </li>
@@ -48,13 +48,13 @@ export function Footer() {
             </nav>
             <div>
               <p className="text-sm font-semibold text-cream">Atendimento</p>
-              <ul className="mt-3 space-y-2 text-base">
-                <li>{CONTACT_NAME}</li>
+              <ul className="mt-2 text-base">
+                <li className="flex min-h-11 items-center">{CONTACT_NAME}</li>
                 <li>
                   <a
                     href={`tel:${PHONE_TEL}`}
                     data-cta="rodape_telefone"
-                    className="hover:text-cream"
+                    className="inline-flex min-h-11 items-center hover:text-cream"
                   >
                     {WHATSAPP_DISPLAY}
                   </a>
@@ -63,7 +63,7 @@ export function Footer() {
                   <a
                     href={`mailto:${CONTACT_EMAIL}`}
                     data-cta="rodape_email"
-                    className="break-all hover:text-cream"
+                    className="inline-flex min-h-11 items-center break-all hover:text-cream"
                   >
                     {CONTACT_EMAIL}
                   </a>
@@ -78,7 +78,7 @@ export function Footer() {
           <button
             type="button"
             onClick={openConsentPreferences}
-            className="self-start text-sm underline underline-offset-4 hover:text-cream sm:self-auto"
+            className="min-h-11 self-start text-sm underline underline-offset-4 hover:text-cream sm:self-auto"
           >
             Preferências de cookies
           </button>
