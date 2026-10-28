@@ -1,127 +1,113 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
   Outlet,
-  Link,
   createRootRouteWithContext,
   useRouter,
   HeadContent,
   Scripts,
   type ErrorComponentProps,
 } from "@tanstack/react-router";
-import { useEffect, type ReactNode } from "react";
+import type { ReactNode } from "react";
 
 import appCss from "../styles.css?url";
-import { reportLovableError } from "../lib/lovable-error-reporting";
-import { WhatsappRedirectFix } from "../components/site/WhatsappRedirectFix";
-import { GoogleAnalytics } from "../components/site/GoogleAnalytics";
-import { getAnalyticsConfig } from "../lib/analytics.functions";
+import { GTM_ID } from "../lib/tracking/config";
+import { consentBootstrapScript, gtmScript } from "../lib/tracking/consent";
+import { SITE_NAME, whatsappLink } from "../lib/site";
+import { TrackingListener } from "../components/site/TrackingListener";
+import { CookieConsent } from "../components/site/CookieConsent";
 
 function NotFoundComponent() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4">
-      <div className="max-w-md text-center">
-        <h1 className="text-7xl font-bold text-foreground">404</h1>
-        <h2 className="mt-4 text-xl font-semibold text-foreground">Page not found</h2>
-        <p className="mt-2 text-sm text-muted-foreground">
-          The page you're looking for doesn't exist or has been moved.
+    <main className="flex min-h-screen items-center bg-forest-deep px-5 text-cream">
+      <div className="mx-auto max-w-lg">
+        <p className="text-sm font-semibold text-gold-soft">Erro 404</p>
+        <h1 className="mt-3 font-display text-5xl text-cream sm:text-6xl">
+          Esta página não existe
+        </h1>
+        <p className="mt-4 text-lg text-cream/80">
+          O endereço pode ter mudado. Volte para a página inicial do Parque das Flores ou fale com
+          nossa equipe.
         </p>
-        <div className="mt-6">
-          <Link
-            to="/"
-            className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+        <div className="mt-8 flex flex-wrap gap-3">
+          <a href="/" className="btn-base btn-gold">
+            Ir para a página inicial
+          </a>
+          <a
+            href={whatsappLink(
+              "Olá! Vim do site do Parque das Flores e quero falar com um consultor.",
+            )}
+            target="_blank"
+            rel="noopener noreferrer"
+            data-cta="404_whatsapp"
+            className="btn-base btn-outline-light"
           >
-            Go home
-          </Link>
+            Falar pelo WhatsApp
+          </a>
         </div>
       </div>
-    </div>
+    </main>
   );
 }
 
 function ErrorComponent({ error, reset }: ErrorComponentProps) {
   console.error(error);
   const router = useRouter();
-  useEffect(() => {
-    reportLovableError(error, { boundary: "tanstack_root_error_component" });
-  }, [error]);
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4">
+    <main className="flex min-h-screen items-center justify-center bg-background px-5">
       <div className="max-w-md text-center">
-        <h1 className="text-xl font-semibold tracking-tight text-foreground">
-          This page didn't load
-        </h1>
-        <p className="mt-2 text-sm text-muted-foreground">
-          Something went wrong on our end. You can try refreshing or head back home.
+        <h1 className="font-display text-3xl text-primary">A página não carregou</h1>
+        <p className="mt-3 text-muted-foreground">
+          Houve uma falha ao abrir esta página. Tente carregar de novo ou volte para o início.
         </p>
-        <div className="mt-6 flex flex-wrap justify-center gap-2">
+        <div className="mt-6 flex flex-wrap justify-center gap-3">
           <button
+            type="button"
             onClick={() => {
               router.invalidate();
               reset();
             }}
-            className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+            className="btn-base btn-primary"
           >
-            Try again
+            Carregar de novo
           </button>
-          <a
-            href="/"
-            className="inline-flex items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-accent"
-          >
-            Go home
+          <a href="/" className="btn-base btn-outline">
+            Ir para o início
           </a>
         </div>
       </div>
-    </div>
+    </main>
   );
 }
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
-  loader: () => getAnalyticsConfig(),
-  head: ({ loaderData }) => ({
+  head: () => ({
+    // Ordem importa: o Consent Mode (padrão "negado") precisa vir antes do GTM.
     scripts: [
-      {
-        children: `(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','GTM-PLJLPM8D');`,
-      },
-      ...(loaderData?.measurementId ? [
-        {
-          async: true,
-          src: `https://www.googletagmanager.com/gtag/js?id=${loaderData.measurementId}`,
-        },
-        {
-          children: `window.dataLayer=window.dataLayer||[];function gtag(){window.dataLayer.push(arguments);}gtag('set','developer_id.dZjgwMW',true);gtag('js',new Date());gtag('config',${JSON.stringify(loaderData.measurementId)},{send_page_view:false});`,
-        },
-      ] : []),
+      { children: consentBootstrapScript() },
+      ...(GTM_ID ? [{ children: gtmScript(GTM_ID) }] : []),
     ],
     meta: [
       { charSet: "utf-8" },
-      { name: "viewport", content: "width=device-width, initial-scale=1" },
-      {
-        name: "google-site-verification",
-        content: "google83a0145380294087",
-      },
-      { title: "Parque das Flores | Loteamento em Sacramento-MG" },
-      {
-        name: "description",
-        content:
-          "Lotes residenciais e comerciais no Parque das Flores em Sacramento-MG. Entrada residencial de R$ 9.000 e parcelas iniciais de 36 a 240 meses, com reajuste anual pelo IPCA.",
-      },
-      { property: "og:site_name", content: "Parque das Flores" },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary_large_image" },
+      { name: "viewport", content: "width=device-width, initial-scale=1, viewport-fit=cover" },
+      { name: "theme-color", content: "#14291f" },
+      // Verificação do Google Search Console já existente no site original.
+      { name: "google-site-verification", content: "google83a0145380294087" },
+      { property: "og:site_name", content: SITE_NAME },
+      { property: "og:locale", content: "pt_BR" },
     ],
     links: [
-      {
-        rel: "stylesheet",
-        href: appCss,
-      },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       {
         rel: "stylesheet",
-        href: "https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Manrope:wght@400;500;600;700&display=swap",
+        href: "https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Manrope:wght@400;500;600&display=swap",
       },
-      { rel: "icon", href: "/favicon.png", type: "image/png" },
+      { rel: "stylesheet", href: appCss },
+      { rel: "icon", href: "/favicon-32.png", type: "image/png", sizes: "32x32" },
+      { rel: "icon", href: "/favicon-48.png", type: "image/png", sizes: "48x48" },
+      { rel: "apple-touch-icon", href: "/apple-touch-icon.png" },
+      { rel: "manifest", href: "/site.webmanifest" },
     ],
   }),
   shellComponent: RootShell,
@@ -137,15 +123,17 @@ function RootShell({ children }: { children: ReactNode }) {
         <HeadContent />
       </head>
       <body>
-        <noscript>
-          <iframe
-            src="https://www.googletagmanager.com/ns.html?id=GTM-PLJLPM8D"
-            height="0"
-            width="0"
-            className="hidden invisible"
-            title="Google Tag Manager"
-          />
-        </noscript>
+        {GTM_ID && (
+          <noscript>
+            <iframe
+              src={`https://www.googletagmanager.com/ns.html?id=${GTM_ID}`}
+              height="0"
+              width="0"
+              style={{ display: "none", visibility: "hidden" }}
+              title="Google Tag Manager"
+            />
+          </noscript>
+        )}
         {children}
         <Scripts />
       </body>
@@ -155,14 +143,12 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
-  const { measurementId } = Route.useLoaderData();
 
   return (
     <QueryClientProvider client={queryClient}>
-      <GoogleAnalytics measurementId={measurementId} />
-      <WhatsappRedirectFix />
-      {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
+      <TrackingListener />
       <Outlet />
+      <CookieConsent />
     </QueryClientProvider>
   );
 }

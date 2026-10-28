@@ -1,20 +1,9 @@
-<!-- LOVABLE:BEGIN -->
-> [!IMPORTANT]
-> This project is connected to [Lovable](https://lovable.dev). Avoid rewriting
-> published git history — force pushing, or rebasing/amending/squashing commits
-> that are already pushed — as it rewrites history on Lovable's side and the
-> user will likely lose their project history.
->
-> Commits you push to the connected branch sync back to Lovable and show up in
-> the editor, so keep the branch in a working state.
-<!-- LOVABLE:END -->
+# Notas para quem for alterar este projeto
 
-- Centralize valores e planos residenciais em `src/lib/site.ts` para manter todas as ofertas consistentes.
-
-- Reuse Brand and BrandSections components for institutional identity and campaign materials; shared assets prevent inconsistent logos and repeated layouts.
-
-- Keep a single contact form near the beginning of the homepage using the existing Formspree submission flow; avoid duplicate lead forms and preserve the established delivery service.
-
-- Read public analytics configuration through a server function and install tracking in the root shell; secrets stay server-side and every page shares one GTM installation and one explicit GA4 page-view sender.
-
-- Use SiteVideo for embedded campaign videos with CDN pointers, native controls, full-frame proportions and no preloading; pause other videos during playback to prevent competing audio and unnecessary downloads.
+- Dados comerciais (preços, entrada, parcelas, IPCA, contato) ficam só em `src/lib/site.ts`. Não altere valores sem confirmação do proprietário.
+- Manter um único formulário de contato perto do início da página (seção `#contato`), com envio pelo Formspree já existente (`src/lib/leads.ts`).
+- Rastreamento: o site carrega apenas o Google Tag Manager (`src/lib/tracking/config.ts`). GA4 e Google Ads são configurados dentro do GTM. Nunca enviar dados pessoais ao `dataLayer`. `generate_lead` só após envio confirmado.
+- Consentimento: padrão negado (Consent Mode v2); o estado muda apenas pela escolha do visitante no aviso de cookies.
+- Imagens e vídeos reais ficam em `public/media` e são catalogados em `src/lib/media.ts`. Não usar placeholders nem imagens inventadas; materiais de campanha são marcados como ilustrativos.
+- Vídeos: `preload="none"` e pôster leve; o vídeo de fundo do topo só toca em telas largas sem economia de dados.
+- Não alterar domínio/DNS nem fazer deploy de produção sem autorização.

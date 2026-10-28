@@ -1,278 +1,229 @@
-import { useCallback, useEffect, useState } from "react";
-import { X, ChevronLeft, ChevronRight, ZoomIn, Maximize2 } from "lucide-react";
-import { Reveal } from "./Reveal";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { ChevronLeft, ChevronRight, X, Expand } from "lucide-react";
+import { SectionHeading } from "./Brand";
 import { SiteVideo } from "./SiteVideo";
-import sunset from "@/assets/panorama-por-do-sol.png.asset.json";
-import lifeVideo from "@/assets/parque-das-flores-sua-vida.mp4.asset.json";
-import locationVideo from "@/assets/parque-das-flores-ponto-de-partida.mp4.asset.json";
-import presentationVideo from "@/assets/parque-das-flores-apresentacao.mp4.asset.json";
-import lifePoster from "@/assets/parque-video-poster-1.jpg.asset.json";
-import locationPoster from "@/assets/parque-video-poster-2.jpg.asset.json";
-import presentationPoster from "@/assets/parque-video-poster-3.jpg.asset.json";
-import a1 from "@/assets/DJI_0126.jpg.asset.json";
-import a2 from "@/assets/DJI_0154.jpg.asset.json";
-import a3 from "@/assets/DJI_0152.jpg.asset.json";
-import a4 from "@/assets/DJI_0155.jpg.asset.json";
-import marked from "@/assets/area-marcada.jpg.asset.json";
-import planta from "@/assets/planta.jpg.asset.json";
-import recente01 from "@/assets/whatsapp-image-2026-09-10-at-18-27-49.jpg.asset.json";
-import recente02 from "@/assets/whatsapp-image-2026-09-10-at-18-27-49-1.jpg.asset.json";
-import recente03 from "@/assets/whatsapp-image-2026-09-10-at-18-27-49-2.jpg.asset.json";
-import recente04 from "@/assets/whatsapp-image-2026-09-10-at-18-27-50.jpg.asset.json";
-import recente05 from "@/assets/whatsapp-image-2026-09-10-at-18-27-50-1.jpg.asset.json";
-import recente06 from "@/assets/whatsapp-image-2026-09-10-at-18-27-50-2.jpg.asset.json";
-import recente07 from "@/assets/whatsapp-image-2026-09-10-at-18-27-50-3.jpg.asset.json";
-import recente08 from "@/assets/whatsapp-image-2026-09-10-at-18-27-51.jpg.asset.json";
-import recente09 from "@/assets/whatsapp-image-2026-09-10-at-18-27-51-1.jpg.asset.json";
-import recente10 from "@/assets/whatsapp-image-2026-09-10-at-18-27-51-2.jpg.asset.json";
+import {
+  GALLERY,
+  GALLERY_CATEGORIES,
+  REELS,
+  srcAt,
+  srcSet,
+  type GalleryCategory,
+} from "@/lib/media";
+import { track } from "@/lib/tracking/datalayer";
 
-const images = [
-  {
-    url: sunset.url,
-    alt: "Panorama ilustrativo do Parque das Flores ao pôr do sol",
-    caption: "Pôr do sol — imagem ilustrativa",
-  },
-  {
-    url: recente04.url,
-    alt: "Vista aérea recente das vias abertas no Parque das Flores",
-    caption: "Obras recentes — visão geral do loteamento",
-    recent: true,
-  },
-  {
-    url: recente01.url,
-    alt: "Abertura das novas vias internas do Parque das Flores",
-    caption: "Obras recentes — implantação das vias",
-    recent: true,
-  },
-  {
-    url: recente02.url,
-    alt: "Vista aérea das obras e acessos do Parque das Flores",
-    caption: "Obras recentes — acessos e infraestrutura",
-    recent: true,
-  },
-  {
-    url: recente05.url,
-    alt: "Acesso em implantação junto à área urbana de Sacramento",
-    caption: "Obras recentes — conexão com a cidade",
-    recent: true,
-  },
-  {
-    url: recente06.url,
-    alt: "Área do Parque das Flores com novas vias em implantação",
-    caption: "Obras recentes — avanço da implantação",
-    recent: true,
-  },
-  {
-    url: recente07.url,
-    alt: "Panorama recente do terreno e das vias do Parque das Flores",
-    caption: "Obras recentes — panorama do empreendimento",
-    recent: true,
-  },
-  {
-    url: recente08.url,
-    alt: "Entorno urbano e acesso ao Parque das Flores",
-    caption: "Obras recentes — localização e entorno",
-    recent: true,
-  },
-  {
-    url: recente09.url,
-    alt: "Vista aérea recente do entorno comercial do loteamento",
-    caption: "Obras recentes — entorno consolidado",
-    recent: true,
-  },
-  {
-    url: recente10.url,
-    alt: "Via interna recém-aberta no Parque das Flores",
-    caption: "Obras recentes — abertura de ruas",
-    recent: true,
-  },
-  {
-    url: recente03.url,
-    alt: "Vista aérea recente da implantação do Parque das Flores",
-    caption: "Obras recentes — infraestrutura em andamento",
-    recent: true,
-  },
-  {
-    url: a1.url,
-    alt: "Vista aérea 01 — Parque das Flores e a cidade de Sacramento-MG ao fundo",
-    caption: "Vista aérea 01 — o empreendimento e a cidade",
-  },
-  {
-    url: a2.url,
-    alt: "Vista aérea 02 — proximidade do loteamento com a malha urbana de Sacramento",
-    caption: "Vista aérea 02 — proximidade com a cidade",
-  },
-  {
-    url: a3.url,
-    alt: "Vista aérea da região de expansão urbana de Sacramento-MG",
-    caption: "Região de expansão urbana",
-  },
-  {
-    url: a4.url,
-    alt: "Vista aérea vertical do entorno do Parque das Flores",
-    caption: "Entorno e acessos principais",
-  },
-  {
-    url: marked.url,
-    alt: "Foto aérea com a área do Parque das Flores destacada",
-    caption: "Área do Parque das Flores em destaque",
-  },
-  {
-    url: planta.url,
-    alt: "Planta urbanística do loteamento Parque das Flores",
-    caption: "Projeto urbanístico oficial",
-  },
-];
+type Filter = GalleryCategory | "todas";
 
 export function Galeria() {
-  const [index, setIndex] = useState<number | null>(null);
-  const [zoom, setZoom] = useState(false);
+  const [filter, setFilter] = useState<Filter>("todas");
+  const [openIndex, setOpenIndex] = useState<number | null>(null);
+  const triggerRef = useRef<HTMLElement | null>(null);
+
+  const items = useMemo(
+    () => (filter === "todas" ? GALLERY : GALLERY.filter((item) => item.category === filter)),
+    [filter],
+  );
+  const current = openIndex === null ? null : items[openIndex];
+
+  const open = (index: number, trigger: HTMLElement) => {
+    triggerRef.current = trigger;
+    setOpenIndex(index);
+    const item = items[index];
+    if (item) track("gallery_view", { content_name: item.id, content_type: item.category });
+  };
 
   const close = useCallback(() => {
-    setIndex(null);
-    setZoom(false);
-  }, []);
-  const next = useCallback(() => {
-    setZoom(false);
-    setIndex((i) => (i === null ? i : (i + 1) % images.length));
-  }, []);
-  const prev = useCallback(() => {
-    setZoom(false);
-    setIndex((i) => (i === null ? i : (i - 1 + images.length) % images.length));
+    setOpenIndex(null);
+    requestAnimationFrame(() => triggerRef.current?.focus());
   }, []);
 
+  const step = useCallback(
+    (delta: number) => {
+      if (openIndex === null) return;
+      const next = (openIndex + delta + items.length) % items.length;
+      setOpenIndex(next);
+      const item = items[next];
+      if (item) track("gallery_view", { content_name: item.id, content_type: item.category });
+    },
+    [items, openIndex],
+  );
+
   useEffect(() => {
-    if (index === null) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") close();
-      if (e.key === "ArrowRight") next();
-      if (e.key === "ArrowLeft") prev();
+    if (openIndex === null) return;
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") close();
+      if (event.key === "ArrowRight") step(1);
+      if (event.key === "ArrowLeft") step(-1);
     };
     window.addEventListener("keydown", onKey);
+    const previous = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     return () => {
       window.removeEventListener("keydown", onKey);
-      document.body.style.overflow = "";
+      document.body.style.overflow = previous;
     };
-  }, [index, close, next, prev]);
+  }, [openIndex, close, step]);
 
-  const fullscreen = () => {
-    const el = document.getElementById("lightbox-shell");
-    if (el?.requestFullscreen) void el.requestFullscreen();
-  };
+  // Gestos de deslizar no celular.
+  const touchX = useRef<number | null>(null);
 
   return (
-    <section id="galeria" className="bg-cream py-20 sm:py-28">
-      <div className="mx-auto max-w-7xl px-5 lg:px-10">
-        <Reveal className="max-w-2xl">
-          <p className="eyebrow">Galeria</p>
-          <h2 className="rule-gold mt-4 font-display text-4xl text-primary sm:text-5xl">
-            Imagens do empreendimento
-          </h2>
-          <p className="mt-6 text-muted-foreground">
-            Acompanhe as obras mais recentes e explore o empreendimento em imagens aéreas.
+    <section id="galeria" aria-labelledby="galeria-title" className="section-y bg-background">
+      <div className="container-site">
+        <SectionHeading
+          id="galeria-title"
+          kicker="Fotos e vídeos"
+          title="Veja o Parque das Flores de perto"
+        >
+          <p>
+            Imagens reais feitas com drone sobre o loteamento, vídeos de apresentação e os materiais
+            de divulgação do empreendimento.
           </p>
-        </Reveal>
+        </SectionHeading>
 
-        <div className="mt-12 border-b border-border pb-12">
-          <h3 className="font-display text-2xl text-primary">Parque das Flores em vídeo</h3>
-          <div className="mt-6 grid items-start gap-6 sm:grid-cols-3">
-            {[
-              { src: lifeVideo.url, poster: lifePoster.url, label: "Sua vida no Parque das Flores" },
-              { src: locationVideo.url, poster: locationPoster.url, label: "Um novo ponto de partida" },
-              { src: presentationVideo.url, poster: presentationPoster.url, label: "Apresentação do Parque das Flores" },
-            ].map((video) => (
-              <figure key={video.src} className="mx-auto w-full max-w-[360px]">
-                <SiteVideo {...video} portrait />
-                <figcaption className="mt-4 text-sm font-medium text-primary">{video.label}</figcaption>
-              </figure>
-            ))}
-          </div>
+        <div
+          role="group"
+          aria-label="Filtrar fotos"
+          className="-mx-5 mt-10 flex gap-2 overflow-x-auto px-5 pb-2 [scrollbar-width:none] sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0"
+        >
+          {GALLERY_CATEGORIES.map((category) => {
+            const selected = filter === category.id;
+            return (
+              <button
+                key={category.id}
+                type="button"
+                aria-pressed={selected}
+                onClick={() => setFilter(category.id)}
+                className={`min-h-11 shrink-0 rounded-full border px-4 text-sm font-semibold transition-colors ${
+                  selected
+                    ? "border-forest bg-forest text-cream"
+                    : "border-border bg-card text-primary hover:border-forest/50"
+                }`}
+              >
+                {category.label}
+              </button>
+            );
+          })}
         </div>
 
-        <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {images.map((img, i) => (
-            <Reveal key={img.url} delay={i * 60}>
-              <button
-                type="button"
-                onClick={() => setIndex(i)}
-                className="group relative block w-full overflow-hidden bg-primary/5"
-              >
-                <img
-                  src={img.url}
-                  alt={img.alt}
-                  loading="lazy"
-                  className="aspect-[4/3] w-full object-cover transition-transform duration-[900ms] ease-out group-hover:scale-[1.07]"
-                />
-                <span className="absolute inset-0 bg-[linear-gradient(180deg,transparent_45%,rgba(8,28,20,0.85))] opacity-80" />
-                {img.recent && (
-                  <span className="absolute left-3 top-3 bg-gold px-3 py-1 text-[0.65rem] font-medium uppercase text-primary">
-                    Atualização recente
+        <ul className="mt-6 grid grid-cols-2 gap-2 sm:gap-3 lg:grid-cols-4">
+          {items.map((item, index) => {
+            const featured = index === 0;
+            return (
+              <li key={item.id} className={featured ? "col-span-2 row-span-2" : ""}>
+                <button
+                  type="button"
+                  onClick={(event) => open(index, event.currentTarget)}
+                  className="group relative block size-full overflow-hidden rounded-lg bg-secondary"
+                  aria-label={`Ampliar: ${item.caption}`}
+                >
+                  <img
+                    src={srcAt(item, featured ? 1280 : 640)}
+                    srcSet={srcSet(item)}
+                    sizes={
+                      featured
+                        ? "(min-width: 1024px) 600px, 100vw"
+                        : "(min-width: 1024px) 300px, 50vw"
+                    }
+                    alt={item.alt}
+                    width={item.width}
+                    height={item.height}
+                    loading="lazy"
+                    decoding="async"
+                    className={`w-full object-cover transition-transform duration-500 group-hover:scale-[1.03] ${featured ? "aspect-[4/3] h-full" : "aspect-[4/3]"}`}
+                  />
+                  <span className="pointer-events-none absolute inset-x-0 bottom-0 flex items-end justify-between gap-2 bg-[linear-gradient(0deg,rgba(10,30,20,0.78),transparent)] p-3 pt-10 text-left">
+                    <span className="text-xs font-medium leading-snug text-cream sm:text-sm">
+                      {item.caption}
+                    </span>
+                    <Expand className="size-4 shrink-0 text-cream/80" aria-hidden />
                   </span>
-                )}
-                <span className="absolute inset-x-0 bottom-0 flex items-center justify-between gap-3 p-4 text-left">
-                  <span className="text-xs uppercase tracking-[0.14em] text-cream">
-                    {img.caption}
-                  </span>
-                  <ZoomIn className="size-5 shrink-0 text-gold" />
-                </span>
-              </button>
-            </Reveal>
-          ))}
+                </button>
+              </li>
+            );
+          })}
+        </ul>
+
+        <div className="mt-16">
+          <h3 className="font-display text-3xl text-primary sm:text-4xl">Vídeos de apresentação</h3>
+          <ul className="-mx-5 mt-6 flex snap-x snap-mandatory gap-4 overflow-x-auto px-5 pb-4 [scrollbar-width:thin] sm:mx-0 sm:grid sm:grid-cols-3 sm:overflow-visible sm:px-0">
+            {REELS.map((video) => (
+              <li key={video.id} className="w-[72%] shrink-0 snap-start sm:w-auto">
+                <SiteVideo video={video} />
+                <p className="mt-3 text-base font-semibold text-primary">{video.title}</p>
+                <p className="text-sm text-muted-foreground">{video.description}</p>
+              </li>
+            ))}
+          </ul>
         </div>
       </div>
 
-      {index !== null && (
+      {current && openIndex !== null && (
         <div
-          id="lightbox-shell"
-          className="fixed inset-0 z-[90] flex flex-col bg-[rgba(6,20,14,0.96)] animate-fade-in"
+          role="dialog"
+          aria-modal="true"
+          aria-label={`Foto ${openIndex + 1} de ${items.length}: ${current.caption}`}
+          className="fixed inset-0 z-[90] flex flex-col bg-[rgba(8,22,15,0.96)] text-cream"
+          onTouchStart={(event) => (touchX.current = event.touches[0]?.clientX ?? null)}
+          onTouchEnd={(event) => {
+            const start = touchX.current;
+            const end = event.changedTouches[0]?.clientX;
+            touchX.current = null;
+            if (start === null || end === undefined || Math.abs(end - start) < 50) return;
+            step(end < start ? 1 : -1);
+          }}
         >
-          <div className="flex items-center justify-between px-5 py-4 text-cream">
-            <span className="text-xs uppercase tracking-[0.18em] text-cream/70">
-              {index + 1} / {images.length}
+          <div className="flex items-center justify-between px-4 py-3 sm:px-6">
+            <span className="text-sm text-cream/75">
+              {openIndex + 1} de {items.length}
             </span>
-            <div className="flex items-center gap-4">
-              <button type="button" onClick={() => setZoom((z) => !z)} aria-label="Zoom">
-                <ZoomIn className={`size-6 ${zoom ? "text-gold" : ""}`} />
-              </button>
-              <button type="button" onClick={fullscreen} aria-label="Tela cheia">
-                <Maximize2 className="size-6" />
-              </button>
-              <button type="button" onClick={close} aria-label="Fechar">
-                <X className="size-7" />
-              </button>
-            </div>
-          </div>
-
-          <div className="relative flex flex-1 items-center justify-center overflow-auto px-3 pb-6">
             <button
               type="button"
-              onClick={prev}
-              aria-label="Anterior"
-              className="absolute left-2 z-10 rounded-full bg-black/40 p-2 text-cream hover:bg-black/70"
+              onClick={close}
+              aria-label="Fechar"
+              autoFocus
+              className="grid size-11 place-items-center rounded-full hover:bg-cream/10"
             >
-              <ChevronLeft className="size-7" />
+              <X className="size-6" aria-hidden />
             </button>
+          </div>
+          <div className="relative flex min-h-0 flex-1 items-center justify-center px-2 sm:px-16">
             <img
-              src={images[index]?.url}
-              alt={images[index]?.alt ?? "Imagem do Parque das Flores"}
-              onClick={() => setZoom((z) => !z)}
-              className={`transition-transform duration-500 ${
-                zoom
-                  ? "max-h-none max-w-none scale-[1.8] cursor-zoom-out"
-                  : "max-h-[78vh] max-w-full cursor-zoom-in object-contain"
-              }`}
+              key={current.id}
+              src={srcAt(current, 1920)}
+              srcSet={srcSet(current)}
+              sizes="100vw"
+              alt={current.alt}
+              width={current.width}
+              height={current.height}
+              decoding="async"
+              className="max-h-full w-auto max-w-full object-contain"
             />
             <button
               type="button"
-              onClick={next}
-              aria-label="Próxima"
-              className="absolute right-2 z-10 rounded-full bg-black/40 p-2 text-cream hover:bg-black/70"
+              onClick={() => step(-1)}
+              aria-label="Foto anterior"
+              className="absolute left-1 grid size-11 place-items-center rounded-full bg-black/40 hover:bg-black/60 sm:left-4 sm:size-12"
             >
-              <ChevronRight className="size-7" />
+              <ChevronLeft className="size-6" aria-hidden />
+            </button>
+            <button
+              type="button"
+              onClick={() => step(1)}
+              aria-label="Próxima foto"
+              className="absolute right-1 grid size-11 place-items-center rounded-full bg-black/40 hover:bg-black/60 sm:right-4 sm:size-12"
+            >
+              <ChevronRight className="size-6" aria-hidden />
             </button>
           </div>
-          <p className="pb-6 text-center text-sm text-cream/80">{images[index]?.caption}</p>
+          <p className="px-6 py-4 text-center text-sm text-cream/85">
+            {current.caption}
+            {current.illustrative
+              ? ""
+              : current.category === "materiais"
+                ? ""
+                : " · Foto real do loteamento"}
+          </p>
         </div>
       )}
     </section>

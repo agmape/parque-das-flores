@@ -1,99 +1,308 @@
-import { useState, type FormEvent } from "react";
-import { MessageCircle, Mail, Phone, CheckCircle, ArrowUpRight } from "lucide-react";
-import { useForm, ValidationError } from "@formspree/react";
+import { useRef, useState, type FormEvent } from "react";
+import { MessageCircle, Mail, Phone, CheckCircle2, Loader2 } from "lucide-react";
 import { z } from "zod";
-import { Button } from "@/components/ui/button";
-import { CONTACT_EMAIL, CONTACT_NAME, WHATSAPP_DISPLAY, mailtoLink, whatsappLink } from "@/lib/site";
+import {
+  CONTACT_EMAIL,
+  CONTACT_NAME,
+  PHONE_TEL,
+  WHATSAPP_DISPLAY,
+  mailtoLink,
+  whatsappLink,
+} from "@/lib/site";
+import { submitLead, LeadSubmitError } from "@/lib/leads";
+import { track } from "@/lib/tracking/datalayer";
+
+const FORM_NAME = "contato_principal";
 
 const leadSchema = z.object({
-  nome: z.string().trim().min(2, "Informe seu nome.").max(100),
-  telefone: z.string().trim().max(20).regex(/^[+\d\s().-]+$/, "Informe um telefone válido.").refine(value => {
-    const digits = value.replace(/\D/g, "");
-    return digits.length >= 10 && digits.length <= 13;
-  }, "Informe o telefone com DDD."),
-  email: z.string().trim().email("Informe um e-mail válido.").max(120),
-  perfil: z.enum(["Comprador", "Corretor"], { errorMap: () => ({ message: "Selecione comprador ou corretor." }) }),
+  nome: z.string().trim().min(2, "Informe seu nome.").max(100, "Use até 100 caracteres."),
+  telefone: z
+    .string()
+    .trim()
+    .max(20, "Telefone muito longo.")
+    .regex(/^[+\d\s().-]+$/, "Use apenas números, espaços, parênteses ou hífen.")
+    .refine((value) => {
+      const digits = value.replace(/\D/g, "");
+      return digits.length >= 10 && digits.length <= 13;
+    }, "Informe o telefone com DDD, por exemplo (34) 99999-9999."),
+  email: z.string().trim().email("Informe um e-mail válido, por exemplo nome@email.com.").max(120),
+  perfil: z.enum(["Comprador", "Corretor"], {
+    errorMap: () => ({ message: "Escolha se você é comprador ou corretor." }),
+  }),
 });
 
-export function Contato() {
-  const [state, handleSubmit] = useForm("mbgjjlle");
-  const [errors, setErrors] = useState<Partial<Record<"nome" | "telefone" | "email" | "perfil", string>>>({});
-  const [deliveryError, setDeliveryError] = useState(false);
-  const field = "mt-2 h-12 w-full rounded-md border border-input bg-background px-4 text-base text-foreground outline-none transition-colors focus:border-primary focus:ring-1 focus:ring-primary";
+type FieldName = keyof z.infer<typeof leadSchema>;
+type Status = "idle" | "sending" | "success" | "error";
 
-  async function submit(event: FormEvent<HTMLFormElement>) {
+const fieldClass =
+  "mt-2 block h-12 w-full rounded-md border border-input bg-card px-4 text-base text-foreground outline-none transition-colors placeholder:text-muted-foreground/70 focus:border-leaf focus:ring-2 focus:ring-leaf/25 aria-[invalid=true]:border-destructive";
+
+export function Contato() {
+  const [status, setStatus] = useState<Status>("idle");
+  const [errors, setErrors] = useState<Partial<Record<FieldName, string>>>({});
+  const [serverError, setServerError] = useState("");
+  const started = useRef(false);
+  const sending = useRef(false);
+
+  function onFirstInteraction() {
+    if (started.current) return;
+    started.current = true;
+    track("form_start", { form_name: FORM_NAME });
+  }
+
+  async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (state.submitting) return;
-    const result = leadSchema.safeParse(Object.fromEntries(new FormData(event.currentTarget)));
+    if (sending.current) return; // evita envio duplo por clique repetido
+    const form = event.currentTarget;
+    const result = leadSchema.safeParse(Object.fromEntries(new FormData(form)));
     if (!result.success) {
-      setErrors(Object.fromEntries(result.error.issues.map(issue => [String(issue.path[0]), issue.message])));
+      const next: Partial<Record<FieldName, string>> = {};
+      for (const issue of result.error.issues) {
+        const key = issue.path[0] as FieldName | undefined;
+        if (key && !next[key]) next[key] = issue.message;
+      }
+      setErrors(next);
+      const first = Object.keys(next)[0];
+      if (first) form.querySelector<HTMLElement>(`[name="${first}"]`)?.focus();
       return;
     }
+
     setErrors({});
-    setDeliveryError(false);
+    setServerError("");
+    sending.current = true;
+    setStatus("sending");
     try {
-      await handleSubmit(result.data);
-    } catch {
-      setDeliveryError(true);
+      await submitLead(result.data, FORM_NAME);
+      setStatus("success");
+      // Conversão somente após o envio confirmado — sem dados pessoais.
+      track("generate_lead", { form_name: FORM_NAME, contact_method: "form" });
+    } catch (error) {
+      setStatus("error");
+      setServerError(
+        error instanceof LeadSubmitError
+          ? `${error.message} Tente novamente ou fale pelo WhatsApp.`
+          : "Não foi possível enviar. Verifique sua conexão e tente novamente, ou fale pelo WhatsApp.",
+      );
+    } finally {
+      sending.current = false;
     }
   }
 
+  const describedBy = (field: FieldName) => (errors[field] ? `erro-${field}` : undefined);
+
   return (
-    <section id="contato" className="bg-secondary py-10 sm:py-14">
-      <div className="mx-auto grid max-w-7xl items-center gap-8 px-5 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)] lg:gap-16 lg:px-10">
-        <div>
-          <p className="eyebrow">Parque das Flores · Sacramento-MG</p>
-          <h2 className="mt-3 font-display text-4xl text-primary sm:text-5xl">Encontre seu próximo lote</h2>
-          <p className="mt-4 max-w-lg leading-relaxed text-muted-foreground">Receba informações sobre os lotes ou agende uma visita. Atendimento direto com {CONTACT_NAME}.</p>
-          <div className="mt-6 hidden flex-wrap gap-x-6 gap-y-3 sm:flex">
-            <a href={whatsappLink("Olá! Quero atendimento sobre os lotes do Parque das Flores.")} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-sm text-primary hover:text-leaf"><Phone className="size-4" />{WHATSAPP_DISPLAY}</a>
-            <a href={mailtoLink("Interesse — Parque das Flores", "Olá! Gostaria de mais informações sobre os lotes do Parque das Flores em Sacramento-MG.")} className="flex min-w-0 items-center gap-2 text-sm text-primary hover:text-leaf"><Mail className="size-4 shrink-0" /><span className="break-all">{CONTACT_EMAIL}</span></a>
-          </div>
+    <section
+      id="contato"
+      aria-labelledby="contato-title"
+      className="relative bg-secondary py-14 sm:py-20"
+    >
+      <div className="container-site grid gap-10 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:items-start lg:gap-16">
+        <div className="lg:pt-4">
+          <p className="kicker">Atendimento direto</p>
+          <h2
+            id="contato-title"
+            className="mt-2 font-display text-[2.25rem] text-primary sm:text-5xl"
+          >
+            Receba a tabela e as condições dos lotes
+          </h2>
+          <p className="mt-5 max-w-md text-lg leading-relaxed text-muted-foreground">
+            Deixe seus dados para receber informações ou agendar uma visita. Quem atende é{" "}
+            {CONTACT_NAME}.
+          </p>
+          <ul className="mt-8 space-y-4 text-base">
+            <li>
+              <a
+                href={whatsappLink("Olá! Quero atendimento sobre os lotes do Parque das Flores.")}
+                target="_blank"
+                rel="noopener noreferrer"
+                data-cta="contato_whatsapp"
+                className="inline-flex items-center gap-3 font-medium text-primary hover:text-leaf"
+              >
+                <MessageCircle className="size-5 text-leaf" aria-hidden /> WhatsApp{" "}
+                {WHATSAPP_DISPLAY}
+              </a>
+            </li>
+            <li>
+              <a
+                href={`tel:${PHONE_TEL}`}
+                data-cta="contato_telefone"
+                className="inline-flex items-center gap-3 font-medium text-primary hover:text-leaf"
+              >
+                <Phone className="size-5 text-leaf" aria-hidden /> Ligar para {WHATSAPP_DISPLAY}
+              </a>
+            </li>
+            <li>
+              <a
+                href={mailtoLink(
+                  "Interesse — Parque das Flores",
+                  "Olá! Gostaria de mais informações sobre os lotes do Parque das Flores em Sacramento-MG.",
+                )}
+                data-cta="contato_email"
+                className="inline-flex min-w-0 items-center gap-3 font-medium text-primary hover:text-leaf"
+              >
+                <Mail className="size-5 shrink-0 text-leaf" aria-hidden />
+                <span className="break-all">{CONTACT_EMAIL}</span>
+              </a>
+            </li>
+          </ul>
         </div>
 
-        <div className="rounded-lg border border-border bg-card p-5 sm:p-7">
-          {state.succeeded ? (
-            <div role="status" className="flex flex-col items-center justify-center py-8 text-center">
-              <CheckCircle className="size-12 text-leaf" />
-              <h3 className="mt-5 font-display text-2xl text-primary">Mensagem enviada!</h3>
-              <p className="mt-3 text-muted-foreground">Sua mensagem foi enviada com sucesso! Nossa equipe entrará em contato em breve.</p>
-              <Button asChild className="mt-6 h-auto whitespace-normal px-5 py-3"><a href={whatsappLink("Olá! Enviei meus dados pelo site e quero agilizar o atendimento sobre os lotes do Parque das Flores.")} target="_blank" rel="noopener noreferrer"><MessageCircle />Falar pelo WhatsApp</a></Button>
+        <div className="rounded-xl border border-border bg-card p-5 shadow-[var(--shadow-elegant)] sm:p-8">
+          {status === "success" ? (
+            <div role="status" aria-live="polite" className="flex flex-col items-start py-6">
+              <CheckCircle2 className="size-10 text-leaf" aria-hidden />
+              <h3 className="mt-4 font-display text-3xl text-primary">Recebemos seus dados</h3>
+              <p className="mt-3 text-muted-foreground">
+                Nossa equipe vai entrar em contato em breve. Se preferir agilizar, chame agora no
+                WhatsApp.
+              </p>
+              <a
+                href={whatsappLink(
+                  "Olá! Enviei meus dados pelo site e quero agilizar o atendimento sobre os lotes do Parque das Flores.",
+                )}
+                target="_blank"
+                rel="noopener noreferrer"
+                data-cta="contato_sucesso_whatsapp"
+                className="btn-base btn-whatsapp mt-6"
+              >
+                <MessageCircle className="size-5" aria-hidden /> Continuar pelo WhatsApp
+              </a>
             </div>
           ) : (
-            <form onSubmit={submit} className="space-y-4">
-              <label className="block text-sm font-medium text-primary" htmlFor="lead-nome">Nome
-                <input id="lead-nome" name="nome" autoComplete="name" className={field} maxLength={100} required placeholder="Seu nome" aria-invalid={Boolean(errors.nome)} aria-describedby={errors.nome ? "error-nome" : undefined} />
-                {errors.nome && <span id="error-nome" className="mt-1 block text-sm text-destructive">{errors.nome}</span>}
-              </label>
-              <div className="grid gap-4 sm:grid-cols-2">
-                <label className="block text-sm font-medium text-primary" htmlFor="lead-telefone">Telefone / WhatsApp
-                  <input id="lead-telefone" name="telefone" type="tel" autoComplete="tel" inputMode="tel" className={field} maxLength={20} required placeholder="(00) 00000-0000" aria-invalid={Boolean(errors.telefone)} aria-describedby={errors.telefone ? "error-telefone" : undefined} />
-                  {errors.telefone && <span id="error-telefone" className="mt-1 block text-sm text-destructive">{errors.telefone}</span>}
+            <form
+              noValidate
+              onSubmit={onSubmit}
+              onFocus={onFirstInteraction}
+              aria-describedby="contato-privacidade"
+              className="space-y-5"
+            >
+              <div>
+                <label className="block text-sm font-semibold text-primary" htmlFor="lead-nome">
+                  Nome
                 </label>
-                <label className="block text-sm font-medium text-primary" htmlFor="lead-email">E-mail
-                  <input id="lead-email" name="email" type="email" autoComplete="email" inputMode="email" className={field} maxLength={120} required placeholder="seu@email.com" aria-invalid={Boolean(errors.email)} aria-describedby={errors.email ? "error-email" : undefined} />
-                  {errors.email && <span id="error-email" className="mt-1 block text-sm text-destructive">{errors.email}</span>}
-                  <ValidationError prefix="E-mail" field="email" errors={state.errors} className="mt-1 block text-sm text-destructive" />
-                </label>
+                <input
+                  id="lead-nome"
+                  name="nome"
+                  autoComplete="name"
+                  maxLength={100}
+                  required
+                  placeholder="Seu nome"
+                  className={fieldClass}
+                  aria-invalid={Boolean(errors.nome)}
+                  aria-describedby={describedBy("nome")}
+                />
+                {errors.nome && (
+                  <p id="erro-nome" className="mt-1.5 text-sm text-destructive">
+                    {errors.nome}
+                  </p>
+                )}
               </div>
-              <fieldset>
-                <legend className="text-sm font-medium text-primary">Você é comprador ou corretor?</legend>
+              <div className="grid gap-5 sm:grid-cols-2">
+                <div>
+                  <label
+                    className="block text-sm font-semibold text-primary"
+                    htmlFor="lead-telefone"
+                  >
+                    Telefone / WhatsApp
+                  </label>
+                  <input
+                    id="lead-telefone"
+                    name="telefone"
+                    type="tel"
+                    autoComplete="tel"
+                    inputMode="tel"
+                    maxLength={20}
+                    required
+                    placeholder="(00) 00000-0000"
+                    className={fieldClass}
+                    aria-invalid={Boolean(errors.telefone)}
+                    aria-describedby={describedBy("telefone")}
+                  />
+                  {errors.telefone && (
+                    <p id="erro-telefone" className="mt-1.5 text-sm text-destructive">
+                      {errors.telefone}
+                    </p>
+                  )}
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-primary" htmlFor="lead-email">
+                    E-mail
+                  </label>
+                  <input
+                    id="lead-email"
+                    name="email"
+                    type="email"
+                    autoComplete="email"
+                    inputMode="email"
+                    maxLength={120}
+                    required
+                    placeholder="seu@email.com"
+                    className={fieldClass}
+                    aria-invalid={Boolean(errors.email)}
+                    aria-describedby={describedBy("email")}
+                  />
+                  {errors.email && (
+                    <p id="erro-email" className="mt-1.5 text-sm text-destructive">
+                      {errors.email}
+                    </p>
+                  )}
+                </div>
+              </div>
+              <fieldset aria-describedby={describedBy("perfil")}>
+                <legend className="text-sm font-semibold text-primary">
+                  Você é comprador ou corretor?
+                </legend>
                 <div className="mt-2 grid grid-cols-2 gap-3">
-                  {["Comprador", "Corretor"].map(profile => (
-                    <label key={profile} className="flex min-h-12 cursor-pointer items-center gap-2 rounded-md border border-input px-3 text-sm text-primary transition-colors has-[:checked]:border-primary has-[:checked]:bg-secondary">
-                      <input type="radio" name="perfil" value={profile} required className="size-4 accent-primary" />{profile}
+                  {(["Comprador", "Corretor"] as const).map((profile) => (
+                    <label
+                      key={profile}
+                      className="flex min-h-12 cursor-pointer items-center gap-3 rounded-md border border-input bg-card px-4 text-base text-primary transition-colors has-[:checked]:border-leaf has-[:checked]:bg-secondary"
+                    >
+                      <input
+                        type="radio"
+                        name="perfil"
+                        value={profile}
+                        required
+                        className="size-4 accent-[var(--leaf)]"
+                      />
+                      {profile}
                     </label>
                   ))}
                 </div>
-                {errors.perfil && <p className="mt-1 text-sm text-destructive">{errors.perfil}</p>}
+                {errors.perfil && (
+                  <p id="erro-perfil" className="mt-1.5 text-sm text-destructive">
+                    {errors.perfil}
+                  </p>
+                )}
               </fieldset>
-              <ValidationError errors={state.errors} className="text-sm text-destructive" />
-              {state.errors && <p role="alert" className="text-sm text-destructive">Não foi possível enviar. Verifique os dados e tente novamente.</p>}
-              {deliveryError && <p role="alert" className="text-sm text-destructive">Não foi possível enviar. Tente novamente ou fale pelo WhatsApp.</p>}
-              <Button type="submit" disabled={state.submitting} className="min-h-12 w-full whitespace-normal px-4 py-3">
-                {state.submitting ? "Enviando..." : "Quero receber atendimento"}<ArrowUpRight />
-              </Button>
-              <p className="text-xs leading-relaxed text-muted-foreground">Ao enviar, você autoriza o contato da nossa equipe sobre o Parque das Flores.</p>
+
+              {status === "error" && serverError && (
+                <p
+                  role="alert"
+                  className="rounded-md bg-destructive/10 px-4 py-3 text-sm text-destructive"
+                >
+                  {serverError}
+                </p>
+              )}
+
+              <button
+                type="submit"
+                disabled={status === "sending"}
+                aria-busy={status === "sending"}
+                className="btn-base btn-primary w-full disabled:cursor-wait disabled:opacity-80"
+              >
+                {status === "sending" ? (
+                  <>
+                    <Loader2 className="size-5 animate-spin" aria-hidden /> Enviando…
+                  </>
+                ) : (
+                  "Quero receber as informações"
+                )}
+              </button>
+              <p id="contato-privacidade" className="text-sm leading-relaxed text-muted-foreground">
+                Ao enviar, você autoriza nossa equipe a entrar em contato sobre o Parque das Flores.
+                Seus dados não são compartilhados com ferramentas de análise.
+              </p>
             </form>
           )}
         </div>
