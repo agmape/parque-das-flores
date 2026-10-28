@@ -9,7 +9,6 @@ import { Localizacao } from "@/components/site/Localizacao";
 import { Queiroz } from "@/components/site/Queiroz";
 import { FloatingActions } from "@/components/site/FloatingActions";
 import { Footer } from "@/components/site/Footer";
-import { HERO_IMAGE } from "@/lib/media";
 import {
   CONTACT_EMAIL,
   PHONE_TEL,
@@ -85,15 +84,6 @@ export const Route = createFileRoute("/")({
     ],
     links: [
       { rel: "canonical", href: canonical },
-      // Imagem principal (LCP) com prioridade de download.
-      {
-        rel: "preload",
-        as: "image",
-        href: `${HERO_IMAGE.base}-1280.webp`,
-        imageSrcSet: HERO_IMAGE.widths.map((w) => `${HERO_IMAGE.base}-${w}.webp ${w}w`).join(", "),
-        imageSizes: "100vw",
-        fetchPriority: "high",
-      },
     ],
     scripts: [{ type: "application/ld+json", children: JSON.stringify(structuredData) }],
   }),
