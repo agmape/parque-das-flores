@@ -20,7 +20,7 @@ const leadSchema = z.object({
 export type LeadPayload = z.infer<typeof leadSchema>;
 
 export const forwardLead = createServerFn({ method: "POST" })
-  .inputValidator(leadSchema)
+  .validator(leadSchema)
   .handler(async ({ data }) => {
     const url = process.env["LEAD_WEBHOOK_URL"]?.trim();
     if (!url) return { forwarded: false as const };
