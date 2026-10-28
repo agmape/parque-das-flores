@@ -82,9 +82,7 @@ export const Route = createFileRoute("/")({
       { name: "twitter:description", content: description },
       { name: "twitter:image", content: ogImage },
     ],
-    links: [
-      { rel: "canonical", href: canonical },
-    ],
+    links: [{ rel: "canonical", href: canonical }],
     scripts: [{ type: "application/ld+json", children: JSON.stringify(structuredData) }],
   }),
 });
