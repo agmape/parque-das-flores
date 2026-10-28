@@ -23,10 +23,7 @@ export function TrackingListener() {
   useEffect(() => {
     const onClick = (event: MouseEvent) => {
       const target = event.target as Element | null;
-      const element = target?.closest?.("a, button") as
-        | HTMLAnchorElement
-        | HTMLButtonElement
-        | null;
+      const element = target?.closest<HTMLAnchorElement | HTMLButtonElement>("a, button");
       if (!element) return;
       const ctaName = element.getAttribute("data-cta") || undefined;
       const href = element instanceof HTMLAnchorElement ? element.getAttribute("href") || "" : "";

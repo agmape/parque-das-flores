@@ -33,6 +33,13 @@ export function consentSignals(choice: Pick<ConsentChoice, "analytics" | "market
   };
 }
 
+export const OPEN_CONSENT_EVENT = "pdf:open-consent";
+
+/** Reabre o painel de preferências de cookies (link no rodapé). */
+export function openConsentPreferences() {
+  window.dispatchEvent(new Event(OPEN_CONSENT_EVENT));
+}
+
 export function readConsent(): ConsentChoice | null {
   if (typeof window === "undefined") return null;
   try {

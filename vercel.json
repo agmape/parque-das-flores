@@ -41,5 +41,5 @@
       ]
     }
   ],
-  "buildCommand": "bun run typecheck; bun run lint; bun run build"
+  "buildCommand": "bun run typecheck && bun run build"
 }

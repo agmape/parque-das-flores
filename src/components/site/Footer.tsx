@@ -1,7 +1,7 @@
 import { MessageCircle } from "lucide-react";
 import { Logo } from "./Brand";
 import { CONTACT_EMAIL, CONTACT_NAME, PHONE_TEL, WHATSAPP_DISPLAY, whatsappLink } from "@/lib/site";
-import { openConsentPreferences } from "./CookieConsent";
+import { openConsentPreferences } from "@/lib/tracking/consent";
 
 const nav = [
   ["#o-parque", "O Parque"],

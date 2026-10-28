@@ -1,12 +1,5 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
-import { readConsent, saveConsent } from "@/lib/tracking/consent";
-
-const OPEN_EVENT = "pdf:open-consent";
-
-/** Reabre o painel de preferências (link no rodapé). */
-export function openConsentPreferences() {
-  window.dispatchEvent(new Event(OPEN_EVENT));
-}
+import { OPEN_CONSENT_EVENT, readConsent, saveConsent } from "@/lib/tracking/consent";
 
 const useIsoLayoutEffect = typeof window === "undefined" ? useEffect : useLayoutEffect;
 
@@ -35,8 +28,8 @@ export function CookieConsent() {
       setCustomizing(true);
       setVisible(true);
     };
-    window.addEventListener(OPEN_EVENT, reopen);
-    return () => window.removeEventListener(OPEN_EVENT, reopen);
+    window.addEventListener(OPEN_CONSENT_EVENT, reopen);
+    return () => window.removeEventListener(OPEN_CONSENT_EVENT, reopen);
   }, []);
 
   // Sobe o botão do WhatsApp enquanto o aviso estiver aberto.
