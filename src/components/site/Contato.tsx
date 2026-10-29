@@ -19,6 +19,7 @@ const leadSchema = z.object({
   telefone: z
     .string()
     .trim()
+    .min(1, "Informe seu telefone com DDD.")
     .max(20, "Telefone muito longo.")
     .regex(/^[+\d\s().-]+$/, "Use apenas números, espaços, parênteses ou hífen.")
     .refine((value) => {
@@ -80,8 +81,8 @@ export function Contato() {
       setStatus("error");
       setServerError(
         error instanceof LeadSubmitError
-          ? `${error.message} Tente novamente ou fale pelo WhatsApp.`
-          : "Não foi possível enviar. Verifique sua conexão e tente novamente, ou fale pelo WhatsApp.",
+          ? `Sua mensagem não foi enviada. ${error.message} Tente novamente em instantes ou fale pelo WhatsApp ${WHATSAPP_DISPLAY}.${error.ref ? ` Código: ${error.ref}.` : ""}`
+          : `Sua mensagem não foi enviada. Verifique sua conexão e tente novamente, ou fale pelo WhatsApp ${WHATSAPP_DISPLAY}.`,
       );
     } finally {
       sending.current = false;

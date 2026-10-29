@@ -64,6 +64,13 @@ A URL **não é alterada** e não há redirects que removam parâmetros.
 No envio do formulário eles seguem junto com o lead como campos `origem_*` (Formspree) e
 `attribution` (webhook do CRM). Eles **não** são enviados ao dataLayer.
 
+## Formulário: envio e logs
+
+O formulário chama a função do servidor `submitLeadServer` (`src/lib/leads.functions.ts`).
+Ela envia pelo Resend (se `RESEND_API_KEY`, `LEAD_EMAIL_TO` e `LEAD_EMAIL_FROM` existirem) ou pelo Formspree (`FORMSPREE_FORM_ID`, padrão `mbgjjlle`).
+Cada envio grava em Vercel → Logs uma linha `{"scope":"lead","step":"send","ref":…,"provider":…,"ok":…,"status":…}` sem nome, telefone nem e-mail completo.
+O código `ref` aparece para o visitante quando o envio falha, para localizar o log.
+
 ## CRM / webhook
 
 Defina `LEAD_WEBHOOK_URL` (e opcionalmente `LEAD_WEBHOOK_SECRET`) nas variáveis da Vercel.

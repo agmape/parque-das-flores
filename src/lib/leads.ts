@@ -1,17 +1,21 @@
-// Envio de leads do formulário.
+// Envio de leads do formulário (lado do navegador).
 //
-// Destino principal: Formspree (mesmo formulário "mbgjjlle" já usado no site).
-// Destino opcional: webhook/CRM configurado por variável de ambiente no servidor
-// (ver src/lib/leads.functions.ts). Para trocar o destino principal, altere
-// apenas submitLead().
+// O navegador só chama a função do servidor (src/lib/leads.functions.ts), que
+// envia o e-mail, registra o resultado nos logs da Vercel e devolve sucesso
+// somente depois que o serviço de e-mail confirma o recebimento.
 import { readAttribution } from "./tracking/attribution";
-import { forwardLead, type LeadPayload } from "./leads.functions";
-
-const FORMSPREE_ENDPOINT = "https://formspree.io/f/mbgjjlle";
+import { submitLeadServer, type LeadPayload, type LeadResult } from "./leads.functions";
 
 export type LeadInput = Pick<LeadPayload, "nome" | "telefone" | "email" | "perfil">;
 
-export class LeadSubmitError extends Error {}
+export class LeadSubmitError extends Error {
+  constructor(
+    message: string,
+    readonly ref?: string,
+  ) {
+    super(message);
+  }
+}
 
 export async function submitLead(input: LeadInput, formName: string) {
   const attribution = Object.fromEntries(
@@ -20,34 +24,15 @@ export async function submitLead(input: LeadInput, formName: string) {
     ),
   ) as Record<string, string>;
 
-  const body = {
-    ...input,
-    form_name: formName,
-    page_location: window.location.href,
-    ...Object.fromEntries(
-      Object.entries(attribution).map(([key, value]) => [`origem_${key}`, value]),
-    ),
-  };
-
-  const response = await fetch(FORMSPREE_ENDPOINT, {
-    method: "POST",
-    headers: { "content-type": "application/json", accept: "application/json" },
-    body: JSON.stringify(body),
-  });
-
-  if (!response.ok) {
-    let message = "Não foi possível enviar agora.";
-    try {
-      const data = (await response.json()) as { errors?: { message?: string }[] };
-      message = data.errors?.[0]?.message || message;
-    } catch {
-      // resposta sem JSON
-    }
-    throw new LeadSubmitError(message);
+  let result: LeadResult;
+  try {
+    result = await submitLeadServer({
+      data: { ...input, form_name: formName, page_location: window.location.href, attribution },
+    });
+  } catch {
+    throw new LeadSubmitError("Não foi possível falar com o servidor.");
   }
 
-  // Encaminhamento opcional ao CRM: não bloqueia nem quebra o envio principal.
-  void forwardLead({
-    data: { ...input, form_name: formName, page_location: window.location.href, attribution },
-  }).catch(() => undefined);
+  if (!result.ok) throw new LeadSubmitError(result.message, result.ref);
+  return result;
 }

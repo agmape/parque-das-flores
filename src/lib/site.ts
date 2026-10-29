@@ -9,8 +9,21 @@ export const SITE_URL = (import.meta.env.VITE_SITE_URL || "https://parquedasflor
 export const SITE_LOCALITY = "Sacramento";
 export const SITE_REGION = "MG";
 
-export const WHATSAPP_NUMBER = "5511948132388";
-export const WHATSAPP_DISPLAY = "(11) 94813-2388";
+// WhatsApp oficial do site — ÚNICA fonte do número.
+// Links (wa.me), número exibido, telefone (tel:) e dados estruturados derivam daqui.
+// Formato: 55 + DDD + número, só dígitos.
+export const WHATSAPP_NUMBER = "5511941691989";
+
+/** "5511941691989" → "(11) 94169-1989" */
+export function formatBrazilPhone(digits: string) {
+  const local = digits.replace(/\D/g, "").replace(/^55/, "");
+  const ddd = local.slice(0, 2);
+  const rest = local.slice(2);
+  const split = rest.length === 9 ? 5 : 4;
+  return `(${ddd}) ${rest.slice(0, split)}-${rest.slice(split)}`;
+}
+
+export const WHATSAPP_DISPLAY = formatBrazilPhone(WHATSAPP_NUMBER);
 export const PHONE_TEL = `+${WHATSAPP_NUMBER}`;
 export const CONTACT_EMAIL = "digitalfistpower@gmail.com";
 export const CONTACT_NAME = "Aglemon Ribeiro";
