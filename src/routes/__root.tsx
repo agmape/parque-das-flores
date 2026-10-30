@@ -86,6 +86,13 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     scripts: [
       { children: consentBootstrapScript() },
       ...(GTM_ID ? [{ children: gtmScript(GTM_ID) }] : []),
+      // Vercel Web Analytics (sem cookies, sem dados pessoais). Instalação oficial
+      // por script, servida pela própria Vercel em /_vercel/insights.
+      {
+        children:
+          "window.va=window.va||function(){(window.vaq=window.vaq||[]).push(arguments)};",
+      },
+      { src: "/_vercel/insights/script.js", defer: true },
     ],
     meta: [
       { charSet: "utf-8" },
