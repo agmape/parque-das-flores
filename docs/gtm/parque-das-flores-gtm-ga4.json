@@ -24,24 +24,24 @@
         "tagFiringOption": "ONCE_PER_EVENT",
         "parameter": [
           {
-            "type": "template",
+            "type": "TEMPLATE",
             "key": "tagId",
             "value": "{{GA4 - ID de métricas}}"
           },
           {
-            "type": "list",
+            "type": "LIST",
             "key": "configSettingsTable",
             "list": [
               {
-                "type": "map",
+                "type": "MAP",
                 "map": [
                   {
-                    "type": "template",
+                    "type": "TEMPLATE",
                     "key": "parameter",
                     "value": "send_page_view"
                   },
                   {
-                    "type": "template",
+                    "type": "TEMPLATE",
                     "key": "parameterValue",
                     "value": "false"
                   }
@@ -63,109 +63,109 @@
         "tagFiringOption": "ONCE_PER_EVENT",
         "parameter": [
           {
-            "type": "template",
+            "type": "TEMPLATE",
             "key": "eventName",
             "value": "{{Event}}"
           },
           {
-            "type": "template",
+            "type": "TEMPLATE",
             "key": "measurementIdOverride",
             "value": "{{GA4 - ID de métricas}}"
           },
           {
-            "type": "boolean",
+            "type": "BOOLEAN",
             "key": "sendEcommerceData",
             "value": "false"
           },
           {
-            "type": "list",
+            "type": "LIST",
             "key": "eventSettingsTable",
             "list": [
               {
-                "type": "map",
+                "type": "MAP",
                 "map": [
                   {
-                    "type": "template",
+                    "type": "TEMPLATE",
                     "key": "parameter",
                     "value": "cta_name"
                   },
                   {
-                    "type": "template",
+                    "type": "TEMPLATE",
                     "key": "parameterValue",
                     "value": "{{DLV - cta_name}}"
                   }
                 ]
               },
               {
-                "type": "map",
+                "type": "MAP",
                 "map": [
                   {
-                    "type": "template",
+                    "type": "TEMPLATE",
                     "key": "parameter",
                     "value": "form_name"
                   },
                   {
-                    "type": "template",
+                    "type": "TEMPLATE",
                     "key": "parameterValue",
                     "value": "{{DLV - form_name}}"
                   }
                 ]
               },
               {
-                "type": "map",
+                "type": "MAP",
                 "map": [
                   {
-                    "type": "template",
+                    "type": "TEMPLATE",
                     "key": "parameter",
                     "value": "contact_method"
                   },
                   {
-                    "type": "template",
+                    "type": "TEMPLATE",
                     "key": "parameterValue",
                     "value": "{{DLV - contact_method}}"
                   }
                 ]
               },
               {
-                "type": "map",
+                "type": "MAP",
                 "map": [
                   {
-                    "type": "template",
+                    "type": "TEMPLATE",
                     "key": "parameter",
                     "value": "content_name"
                   },
                   {
-                    "type": "template",
+                    "type": "TEMPLATE",
                     "key": "parameterValue",
                     "value": "{{DLV - content_name}}"
                   }
                 ]
               },
               {
-                "type": "map",
+                "type": "MAP",
                 "map": [
                   {
-                    "type": "template",
+                    "type": "TEMPLATE",
                     "key": "parameter",
                     "value": "content_type"
                   },
                   {
-                    "type": "template",
+                    "type": "TEMPLATE",
                     "key": "parameterValue",
                     "value": "{{DLV - content_type}}"
                   }
                 ]
               },
               {
-                "type": "map",
+                "type": "MAP",
                 "map": [
                   {
-                    "type": "template",
+                    "type": "TEMPLATE",
                     "key": "parameter",
                     "value": "link_url"
                   },
                   {
-                    "type": "template",
+                    "type": "TEMPLATE",
                     "key": "parameterValue",
                     "value": "{{DLV - link_url}}"
                   }
@@ -187,17 +187,17 @@
         "tagFiringOption": "ONCE_PER_EVENT",
         "parameter": [
           {
-            "type": "boolean",
+            "type": "BOOLEAN",
             "key": "enableCrossDomain",
             "value": "false"
           },
           {
-            "type": "boolean",
+            "type": "BOOLEAN",
             "key": "enableUrlPassthrough",
             "value": "false"
           },
           {
-            "type": "boolean",
+            "type": "BOOLEAN",
             "key": "enableCookieOverrides",
             "value": "false"
           }
@@ -219,12 +219,12 @@
             "type": "MATCH_REGEX",
             "parameter": [
               {
-                "type": "template",
+                "type": "TEMPLATE",
                 "key": "arg0",
                 "value": "{{_event}}"
               },
               {
-                "type": "template",
+                "type": "TEMPLATE",
                 "key": "arg1",
                 "value": "^(page_view|cta_click|click_whatsapp|click_phone|form_start|generate_lead|map_click|gallery_view|video_play)$"
               }
@@ -242,7 +242,7 @@
         "type": "c",
         "parameter": [
           {
-            "type": "template",
+            "type": "TEMPLATE",
             "key": "value",
             "value": "G-0022VX12X6"
           }
@@ -256,17 +256,17 @@
         "type": "v",
         "parameter": [
           {
-            "type": "integer",
+            "type": "INTEGER",
             "key": "dataLayerVersion",
             "value": "2"
           },
           {
-            "type": "boolean",
+            "type": "BOOLEAN",
             "key": "setDefaultValue",
             "value": "false"
           },
           {
-            "type": "template",
+            "type": "TEMPLATE",
             "key": "name",
             "value": "cta_name"
           }
@@ -280,17 +280,17 @@
         "type": "v",
         "parameter": [
           {
-            "type": "integer",
+            "type": "INTEGER",
             "key": "dataLayerVersion",
             "value": "2"
           },
           {
-            "type": "boolean",
+            "type": "BOOLEAN",
             "key": "setDefaultValue",
             "value": "false"
           },
           {
-            "type": "template",
+            "type": "TEMPLATE",
             "key": "name",
             "value": "form_name"
           }
@@ -304,17 +304,17 @@
         "type": "v",
         "parameter": [
           {
-            "type": "integer",
+            "type": "INTEGER",
             "key": "dataLayerVersion",
             "value": "2"
           },
           {
-            "type": "boolean",
+            "type": "BOOLEAN",
             "key": "setDefaultValue",
             "value": "false"
           },
           {
-            "type": "template",
+            "type": "TEMPLATE",
             "key": "name",
             "value": "contact_method"
           }
@@ -328,17 +328,17 @@
         "type": "v",
         "parameter": [
           {
-            "type": "integer",
+            "type": "INTEGER",
             "key": "dataLayerVersion",
             "value": "2"
           },
           {
-            "type": "boolean",
+            "type": "BOOLEAN",
             "key": "setDefaultValue",
             "value": "false"
           },
           {
-            "type": "template",
+            "type": "TEMPLATE",
             "key": "name",
             "value": "content_name"
           }
@@ -352,17 +352,17 @@
         "type": "v",
         "parameter": [
           {
-            "type": "integer",
+            "type": "INTEGER",
             "key": "dataLayerVersion",
             "value": "2"
           },
           {
-            "type": "boolean",
+            "type": "BOOLEAN",
             "key": "setDefaultValue",
             "value": "false"
           },
           {
-            "type": "template",
+            "type": "TEMPLATE",
             "key": "name",
             "value": "content_type"
           }
@@ -376,17 +376,17 @@
         "type": "v",
         "parameter": [
           {
-            "type": "integer",
+            "type": "INTEGER",
             "key": "dataLayerVersion",
             "value": "2"
           },
           {
-            "type": "boolean",
+            "type": "BOOLEAN",
             "key": "setDefaultValue",
             "value": "false"
           },
           {
-            "type": "template",
+            "type": "TEMPLATE",
             "key": "name",
             "value": "link_url"
           }
