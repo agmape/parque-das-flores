@@ -5,7 +5,7 @@ import { whatsappLink } from "@/lib/site";
 
 const links = [
   { href: "#o-parque", label: "O Parque" },
-  { href: "#lotes", label: "Lotes e valores" },
+  { href: "#lotes", label: "Lotes" },
   { href: "#galeria", label: "Fotos e vídeos" },
   { href: "#localizacao", label: "Localização" },
   { href: "#contato", label: "Contato" },

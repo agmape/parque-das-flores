@@ -2,7 +2,7 @@ import { Check } from "lucide-react";
 import { SectionHeading } from "./Brand";
 import { SiteVideo } from "./SiteVideo";
 import { GALLERY, MAIN_VIDEO, srcSet } from "@/lib/media";
-import { DOWN_PAYMENT, MAX_RESIDENTIAL_INSTALLMENTS, PROJECT_FACTS, brl } from "@/lib/site";
+import { PROJECT_FACTS } from "@/lib/site";
 
 const image = GALLERY.find((item) => item.id === "quadras-vias-abertas") ?? GALLERY[0]!;
 
@@ -21,7 +21,6 @@ const highlights = [
   "Junto ao corredor de entrada da cidade",
   "Bairro novo em região consolidada",
   "Áreas verdes e área institucional",
-  `Entrada de ${brl(DOWN_PAYMENT).replace(",00", "")} e parcelas iniciais em até ${MAX_RESIDENTIAL_INSTALLMENTS} meses, com reajuste anual pelo IPCA`,
   "Fase inicial de implantação",
 ];
 

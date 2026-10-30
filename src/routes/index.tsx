@@ -20,7 +20,7 @@ import {
 
 const title = "Parque das Flores | Loteamento em Sacramento-MG";
 const description =
-  "Lotes residenciais de 200 m² e comerciais de 600 m² no Parque das Flores, em Sacramento-MG. Entrada residencial de R$ 9.000 e parcelas iniciais de 36 a 240 meses, com reajuste anual pelo IPCA.";
+  "Lotes residenciais de 200 m² e comerciais de 600 m² no Parque das Flores, em Sacramento-MG. Um empreendimento Queiroz, 50 anos. Fale com nossa equipe e receba valores e condições.";
 const canonical = `${SITE_URL}/`;
 const ogImage = `${SITE_URL}/og-parque-das-flores.jpg`;
 

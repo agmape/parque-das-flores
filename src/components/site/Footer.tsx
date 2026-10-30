@@ -5,7 +5,7 @@ import { openConsentPreferences } from "@/lib/tracking/consent";
 
 const nav = [
   ["#o-parque", "O Parque"],
-  ["#lotes", "Lotes e valores"],
+  ["#lotes", "Lotes"],
   ["#galeria", "Fotos e vídeos"],
   ["#localizacao", "Localização"],
   ["#contato", "Contato"],
@@ -86,9 +86,8 @@ export function Footer() {
 
         <p className="mt-8 text-sm leading-relaxed text-cream/55">
           Imagens aéreas reais do local, feitas com drone. Imagens marcadas como ilustrativas são
-          materiais de campanha. Valores e condições sujeitos a alteração sem aviso prévio. As
-          parcelas residenciais divulgadas são iniciais, com reajuste anual pelo IPCA, conforme
-          contrato. Este material não constitui promessa de rentabilidade.
+          materiais de campanha. Valores e condições são informados no atendimento e estão sujeitos
+          a alteração sem aviso prévio. Este material não constitui promessa de rentabilidade.
         </p>
       </div>
     </footer>

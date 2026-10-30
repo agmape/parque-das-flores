@@ -1,20 +1,9 @@
-import { Home, Store, MessageCircle, Info } from "lucide-react";
+import { Home, Store, MessageCircle } from "lucide-react";
 import { SectionHeading } from "./Brand";
-import {
-  COMMERCIAL_MAX_PRICE,
-  COMMERCIAL_PRICE,
-  COMMERCIAL_PRICE_PER_SQM,
-  DOWN_PAYMENT,
-  MAX_RESIDENTIAL_INSTALLMENTS,
-  PRICE,
-  PROJECT_FACTS,
-  RESIDENTIAL_IPCA_SHORT_NOTICE,
-  RESIDENTIAL_PLANS,
-  brl,
-  residentialInstallmentNotice,
-  whatsappLink,
-} from "@/lib/site";
+import { PROJECT_FACTS, whatsappLink } from "@/lib/site";
 
+// Valores e condições de pagamento não são publicados no site:
+// são informados pela equipe no atendimento (WhatsApp ou formulário).
 const lots = [
   {
     id: "residencial",
@@ -23,12 +12,9 @@ const lots = [
     size: PROJECT_FACTS.residentialSize,
     count: PROJECT_FACTS.residentialLots,
     text: "Espaço para construir sua casa e viver com mais tranquilidade.",
-    price: PRICE,
-    priceNote: "Lotes de esquina ou pré-esquina possuem valores superiores ao inicial.",
-    payment: `${residentialInstallmentNotice(RESIDENTIAL_PLANS.at(-1)?.installment ?? 0)} Opção de ${MAX_RESIDENTIAL_INSTALLMENTS} meses.`,
-    cta: "Garantir lote residencial",
+    cta: "Consultar lote residencial",
     message:
-      "Olá! Tenho interesse em garantir um Lote Residencial de 200m² no Parque das Flores (Sacramento-MG). Gostaria de saber mais sobre as parcelas iniciais com reajuste anual pelo IPCA, conforme contrato.",
+      "Olá! Tenho interesse em um Lote Residencial de 200m² no Parque das Flores (Sacramento-MG). Gostaria de receber valores e condições.",
   },
   {
     id: "comercial",
@@ -37,21 +23,11 @@ const lots = [
     size: PROJECT_FACTS.commercialSize,
     count: PROJECT_FACTS.commercialLots,
     text: "Espaço para investir, empreender e crescer em uma região com potencial de valorização.",
-    price: COMMERCIAL_PRICE,
-    priceNote: `Equivalente a R$ ${COMMERCIAL_PRICE_PER_SQM.toLocaleString("pt-BR")}/m². Valores de esquina/pré-esquina podem chegar a ${brl(COMMERCIAL_MAX_PRICE)}.`,
-    payment: undefined,
-    cta: "Garantir lote comercial",
+    cta: "Consultar lote comercial",
     message:
-      "Olá! Tenho interesse em garantir um Lote Comercial de 600m² no Parque das Flores (Sacramento-MG).",
+      "Olá! Tenho interesse em um Lote Comercial de 600m² no Parque das Flores (Sacramento-MG). Gostaria de receber valores e condições.",
   },
 ] as const;
-
-const launchConditions = [
-  `Entrada a partir de ${brl(DOWN_PAYMENT)}`,
-  `Parcelas iniciais em até ${MAX_RESIDENTIAL_INSTALLMENTS} meses`,
-  "Reajuste anual pelo IPCA, conforme contrato",
-  `Lotes a partir de ${brl(PRICE)}`,
-];
 
 export function Lotes() {
   return (
@@ -59,12 +35,12 @@ export function Lotes() {
       <div className="container-site">
         <SectionHeading
           id="lotes-title"
-          kicker="Valores e tamanhos"
+          kicker="Residenciais e comerciais"
           title="Escolha o lote ideal para você"
         >
           <p>
-            Lotes residenciais e comerciais com condições especiais de lançamento, a partir de 90
-            mil reais.
+            Lotes residenciais e comerciais em Sacramento-MG. Valores e condições são informados
+            pela nossa equipe no atendimento.
           </p>
         </SectionHeading>
 
@@ -91,21 +67,6 @@ export function Lotes() {
                 {lot.text}
               </p>
 
-              <div className="mt-8 border-t border-border pt-6">
-                <p className="text-sm text-muted-foreground">Preço inicial</p>
-                <p className="mt-1 font-display text-4xl font-semibold text-terra">
-                  {brl(lot.price)}
-                </p>
-                <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
-                  {lot.priceNote}
-                </p>
-                {lot.payment && (
-                  <p className="mt-3 text-sm font-medium leading-relaxed text-primary">
-                    {lot.payment}
-                  </p>
-                )}
-              </div>
-
               <a
                 href={whatsappLink(lot.message)}
                 target="_blank"
@@ -122,20 +83,15 @@ export function Lotes() {
         <div className="mt-8 grid gap-6 rounded-xl bg-forest-deep p-6 text-cream sm:p-8 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
           <div>
             <h3 className="font-display text-2xl text-cream sm:text-3xl">
-              Condições especiais de lançamento
+              Receba a tabela de valores e condições
             </h3>
-            <ul className="mt-4 grid gap-x-8 gap-y-2 text-base text-cream/85 sm:grid-cols-2">
-              {launchConditions.map((item) => (
-                <li key={item} className="flex gap-2">
-                  <span aria-hidden className="mt-2.5 size-1.5 shrink-0 rounded-full bg-gold" />
-                  {item}
-                </li>
-              ))}
-            </ul>
+            <p className="mt-3 max-w-xl text-base text-cream/80">
+              Nossa equipe envia a tabela atualizada e tira suas dúvidas sobre os lotes disponíveis.
+            </p>
           </div>
           <a
             href={whatsappLink(
-              `Olá! Gostaria de receber a tabela atualizada de lotes residenciais do Parque das Flores, com parcelas iniciais ${RESIDENTIAL_IPCA_SHORT_NOTICE}.`,
+              "Olá! Gostaria de receber a tabela atualizada de valores e condições dos lotes do Parque das Flores.",
             )}
             target="_blank"
             rel="noopener noreferrer"
@@ -145,16 +101,6 @@ export function Lotes() {
             Solicitar tabela atualizada
           </a>
         </div>
-
-        <p className="mt-6 flex gap-3 text-sm leading-relaxed text-muted-foreground">
-          <Info className="mt-0.5 size-4 shrink-0 text-terra" aria-hidden />
-          <span>
-            <strong className="font-semibold text-foreground">Ajuste de preços:</strong> os valores
-            atuais são exclusivos para os primeiros clientes. Ocorrerá um aumento da tabela no
-            lançamento oficial. As parcelas residenciais divulgadas são iniciais,{" "}
-            {RESIDENTIAL_IPCA_SHORT_NOTICE}.
-          </span>
-        </p>
       </div>
     </section>
   );

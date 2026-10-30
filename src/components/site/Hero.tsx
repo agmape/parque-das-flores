@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { MessageCircle, Play } from "lucide-react";
 import { HERO_IMAGE, HERO_LOOP, srcSet } from "@/lib/media";
-import { MAX_RESIDENTIAL_INSTALLMENTS, PROJECT_FACTS, whatsappLink } from "@/lib/site";
+import { PROJECT_FACTS, whatsappLink } from "@/lib/site";
 
 type NetworkInformation = { saveData?: boolean; effectiveType?: string };
 
@@ -19,10 +19,7 @@ const facts = [
   { value: String(PROJECT_FACTS.totalLots), label: "lotes planejados" },
   { value: PROJECT_FACTS.residentialSize, label: "lotes residenciais" },
   { value: PROJECT_FACTS.commercialSize, label: "lotes comerciais" },
-  {
-    value: `até ${MAX_RESIDENTIAL_INSTALLMENTS}x`,
-    label: "parcelas iniciais, reajuste anual pelo IPCA",
-  },
+  { value: String(PROJECT_FACTS.blocks), label: "quadras com sistema viário planejado" },
 ];
 
 export function Hero() {
