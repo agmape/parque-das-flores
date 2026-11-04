@@ -230,7 +230,7 @@ async function sendToHubspot(data: LeadPayload, ref: string) {
       contactId = created.json.message?.match(/ID:\s*(\d+)/)?.[1];
       if (contactId) {
         const update = { ...properties };
-        delete update.lifecyclestage;
+        delete update["lifecyclestage"];
         await hubspotFetch(`/crm/v3/objects/contacts/${contactId}`, "PATCH", {
           properties: update,
         });
