@@ -12,7 +12,8 @@ import { z } from "zod";
 // 2. Formspree — caso contrário (formulário FORMSPREE_FORM_ID, padrão "mbgjjlle",
 //    o mesmo que o site já usava). O e-mail de destino do Formspree é configurado
 //    no painel do Formspree, não aqui.
-// Opcional: LEAD_WEBHOOK_URL (+ LEAD_WEBHOOK_SECRET) recebe uma cópia do lead (CRM).
+// Opcional: LEAD_WEBHOOK_URL (+ LEAD_WEBHOOK_SECRET) recebe uma cópia do lead.
+// Opcional: HUBSPOT_TOKEN envia o lead ao HubSpot (contato + nota com a origem).
 
 export const leadSchema = z.object({
   nome: z.string().trim().min(2).max(100),
@@ -185,6 +186,90 @@ async function forwardToWebhook(data: LeadPayload, ref: string) {
   }
 }
 
+// HubSpot (CRM): se HUBSPOT_TOKEN existir (token de "aplicativo privado" com
+// permissão de contatos), cada lead confirmado vira/atualiza um contato e ganha
+// uma nota com perfil, página e origem (UTM/gclid). Falha aqui não derruba o
+// envio do lead: só é registrada no log.
+const HUBSPOT_API = "https://api.hubapi.com";
+
+async function hubspotFetch(path: string, method: string, body: unknown) {
+  const response = await fetch(`${HUBSPOT_API}${path}`, {
+    method,
+    headers: {
+      authorization: `Bearer ${env("HUBSPOT_TOKEN")}`,
+      "content-type": "application/json",
+    },
+    body: JSON.stringify(body),
+    signal: AbortSignal.timeout(8000),
+  });
+  const json = (await response.json().catch(() => ({}))) as {
+    id?: string;
+    message?: string;
+    category?: string;
+  };
+  return { status: response.status, ok: response.ok, json };
+}
+
+async function sendToHubspot(data: LeadPayload, ref: string) {
+  if (!env("HUBSPOT_TOKEN")) return;
+  const [firstname, ...rest] = data.nome.trim().split(/\s+/);
+  const properties: Record<string, string> = {
+    email: data.email,
+    firstname: firstname ?? data.nome,
+    lastname: rest.join(" "),
+    phone: data.telefone,
+    lifecyclestage: "lead",
+  };
+  try {
+    let contactId: string | undefined;
+    const created = await hubspotFetch("/crm/v3/objects/contacts", "POST", { properties });
+    if (created.ok) {
+      contactId = created.json.id;
+    } else if (created.status === 409) {
+      // Contato já existe: atualiza pelo ID informado na resposta.
+      contactId = created.json.message?.match(/ID:\s*(\d+)/)?.[1];
+      if (contactId) {
+        const update = { ...properties };
+        delete update.lifecyclestage;
+        await hubspotFetch(`/crm/v3/objects/contacts/${contactId}`, "PATCH", {
+          properties: update,
+        });
+      }
+    }
+    log(contactId ? "info" : "error", {
+      step: "hubspot_contact",
+      ref,
+      status: created.status,
+      ok: Boolean(contactId),
+      error: contactId ? undefined : created.json.category,
+    });
+    if (!contactId) return;
+
+    const lines = leadRows(data).map(([label, value]) => `<b>${escapeHtml(label)}:</b> ${escapeHtml(String(value))}`);
+    const note = await hubspotFetch("/crm/v3/objects/notes", "POST", {
+      properties: {
+        hs_timestamp: new Date().toISOString(),
+        hs_note_body: `<p><b>Lead do site Parque das Flores</b> (ref. ${ref})</p><p>${lines.join("<br>")}</p>`,
+      },
+      associations: [
+        {
+          to: { id: contactId },
+          types: [{ associationCategory: "HUBSPOT_DEFINED", associationTypeId: 202 }],
+        },
+      ],
+    });
+    log(note.ok ? "info" : "error", {
+      step: "hubspot_note",
+      ref,
+      status: note.status,
+      ok: note.ok,
+      error: note.ok ? undefined : note.json.category,
+    });
+  } catch (error) {
+    log("error", { step: "hubspot", ref, error: error instanceof Error ? error.name : "unknown" });
+  }
+}
+
 export const submitLeadServer = createServerFn({ method: "POST" })
   .validator(leadSchema)
   .handler(async ({ data }): Promise<LeadResult> => {
@@ -220,7 +305,7 @@ export const submitLeadServer = createServerFn({ method: "POST" })
           message: "O serviço de e-mail recusou o envio.",
         };
       }
-      await forwardToWebhook(data, ref);
+      await Promise.all([forwardToWebhook(data, ref), sendToHubspot(data, ref)]);
       return { ok: true, ref, provider };
     } catch (error) {
       log("error", {
