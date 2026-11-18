@@ -74,8 +74,13 @@ export const brl = (value: number) =>
 export const residentialInstallmentNotice = (value: number) =>
   `Parcelas iniciais de ${brl(value)}, ${RESIDENTIAL_IPCA_SHORT_NOTICE}.`;
 
-export const whatsappLink = (message: string) =>
-  `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
+// Mensagem padrão de TODOS os botões de WhatsApp do site (identifica a origem: código Mon).
+export const WHATSAPP_MESSAGE =
+  "Olá! Venho através do site parquedasflores.life (Parque das Flores), código: Mon, e gostaria de falar com o corretor.";
+
+// O texto passado por cada botão é ignorado: todos enviam WHATSAPP_MESSAGE.
+export const whatsappLink = (_message?: string) =>
+  `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(WHATSAPP_MESSAGE)}`;
 
 export const mailtoLink = (subject: string, body: string) =>
   `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
