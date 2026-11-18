@@ -27,7 +27,7 @@ export const leadSchema = z.object({
       return digits.length >= 10 && digits.length <= 13;
     }),
   email: z.string().trim().email().max(120),
-  perfil: z.enum(["Comprador", "Corretor"]),
+  perfil: z.enum(["Morar", "Investir"]),
   form_name: z.string().max(60),
   page_location: z.string().max(500),
   attribution: z.record(z.string().max(500)).optional(),
@@ -73,7 +73,7 @@ function leadRows(data: LeadPayload) {
     ["Nome", data.nome],
     ["Telefone / WhatsApp", data.telefone],
     ["E-mail", data.email],
-    ["Perfil", data.perfil],
+    ["Objetivo", data.perfil],
     ["Formulário", data.form_name],
     ["Página", data.page_location],
     ...Object.entries(data.attribution ?? {}).map(([key, value]) => [`Origem: ${key}`, value]),

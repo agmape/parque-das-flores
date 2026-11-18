@@ -12,9 +12,9 @@ export const SITE_REGION = "MG";
 // WhatsApp oficial do site — ÚNICA fonte do número.
 // Links (wa.me), número exibido, telefone (tel:) e dados estruturados derivam daqui.
 // Formato: 55 + DDD + número, só dígitos.
-export const WHATSAPP_NUMBER = "5511941691989";
+export const WHATSAPP_NUMBER = "5534984319067";
 
-/** "5511941691989" → "(11) 94169-1989" */
+/** "5534984319067" → "(34) 98431-9067" */
 export function formatBrazilPhone(digits: string) {
   const local = digits.replace(/\D/g, "").replace(/^55/, "");
   const ddd = local.slice(0, 2);

@@ -27,8 +27,8 @@ const leadSchema = z.object({
       return digits.length >= 10 && digits.length <= 13;
     }, "Informe o telefone com DDD, por exemplo (34) 99999-9999."),
   email: z.string().trim().email("Informe um e-mail válido, por exemplo nome@email.com.").max(120),
-  perfil: z.enum(["Comprador", "Corretor"], {
-    errorMap: () => ({ message: "Escolha se você é comprador ou corretor." }),
+  perfil: z.enum(["Morar", "Investir"], {
+    errorMap: () => ({ message: "Escolha se o lote é para morar ou investir." }),
   }),
 });
 
@@ -251,10 +251,10 @@ export function Contato() {
               </div>
               <fieldset aria-describedby={describedBy("perfil")}>
                 <legend className="text-sm font-semibold text-primary">
-                  Você é comprador ou corretor?
+                  Você procura o lote para:
                 </legend>
                 <div className="mt-2 grid grid-cols-2 gap-3">
-                  {(["Comprador", "Corretor"] as const).map((profile) => (
+                  {(["Morar", "Investir"] as const).map((profile) => (
                     <label
                       key={profile}
                       className="flex min-h-12 cursor-pointer items-center gap-3 rounded-md border border-input bg-card px-4 text-base text-primary transition-colors has-[:checked]:border-leaf has-[:checked]:bg-secondary"
