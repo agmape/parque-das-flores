@@ -4,6 +4,7 @@ import { z } from "zod";
 import {
   CONTACT_EMAIL,
   CONTACT_NAME,
+  PHONE_DISPLAY,
   PHONE_TEL,
   WHATSAPP_DISPLAY,
   mailtoLink,
@@ -129,7 +130,7 @@ export function Contato() {
                 data-cta="contato_telefone"
                 className="inline-flex min-h-11 items-center gap-3 font-medium text-primary hover:text-leaf"
               >
-                <Phone className="size-5 text-leaf" aria-hidden /> Ligar para {WHATSAPP_DISPLAY}
+                <Phone className="size-5 text-leaf" aria-hidden /> Ligar para {PHONE_DISPLAY}
               </a>
             </li>
             <li>

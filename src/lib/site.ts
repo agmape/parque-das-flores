@@ -12,9 +12,9 @@ export const SITE_REGION = "MG";
 // WhatsApp oficial do site — ÚNICA fonte do número.
 // Links (wa.me), número exibido, telefone (tel:) e dados estruturados derivam daqui.
 // Formato: 55 + DDD + número, só dígitos.
-export const WHATSAPP_NUMBER = "5534999421088";
+export const WHATSAPP_NUMBER = "5534991186114";
 
-/** "5534999421088" → "(34) 99942-1088" */
+/** "5534991186114" → "(34) 99118-6114" */
 export function formatBrazilPhone(digits: string) {
   const local = digits.replace(/\D/g, "").replace(/^55/, "");
   const ddd = local.slice(0, 2);
@@ -24,9 +24,12 @@ export function formatBrazilPhone(digits: string) {
 }
 
 export const WHATSAPP_DISPLAY = formatBrazilPhone(WHATSAPP_NUMBER);
-export const PHONE_TEL = `+${WHATSAPP_NUMBER}`;
+// Telefone para LIGAÇÃO (botões "Ligar" e dados estruturados) — separado do WhatsApp.
+export const PHONE_NUMBER = "5534999421088";
+export const PHONE_DISPLAY = formatBrazilPhone(PHONE_NUMBER);
+export const PHONE_TEL = `+${PHONE_NUMBER}`;
 export const CONTACT_EMAIL = "digitalfistpower@gmail.com";
-export const CONTACT_NAME = "Aglemon Ribeiro";
+export const CONTACT_NAME = "Marcelo Flores";
 
 export const PRICE = 90000;
 export const DOWN_PAYMENT = 9000;

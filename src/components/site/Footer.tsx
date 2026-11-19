@@ -1,6 +1,6 @@
 import { MessageCircle } from "lucide-react";
 import { Logo } from "./Brand";
-import { CONTACT_EMAIL, CONTACT_NAME, PHONE_TEL, WHATSAPP_DISPLAY, whatsappLink } from "@/lib/site";
+import { CONTACT_EMAIL, CONTACT_NAME, PHONE_DISPLAY, PHONE_TEL, whatsappLink } from "@/lib/site";
 import { openConsentPreferences } from "@/lib/tracking/consent";
 
 const nav = [
@@ -56,7 +56,7 @@ export function Footer() {
                     data-cta="rodape_telefone"
                     className="inline-flex min-h-11 items-center hover:text-cream"
                   >
-                    {WHATSAPP_DISPLAY}
+                    {PHONE_DISPLAY}
                   </a>
                 </li>
                 <li>
