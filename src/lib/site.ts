@@ -24,8 +24,8 @@ export function formatBrazilPhone(digits: string) {
 }
 
 export const WHATSAPP_DISPLAY = formatBrazilPhone(WHATSAPP_NUMBER);
-// Telefone para LIGAÇÃO (botões "Ligar" e dados estruturados) — separado do WhatsApp.
-export const PHONE_NUMBER = "5534999421088";
+// Telefone para LIGAÇÃO (botões "Ligar" e dados estruturados) — hoje é o mesmo do WhatsApp.
+export const PHONE_NUMBER = WHATSAPP_NUMBER;
 export const PHONE_DISPLAY = formatBrazilPhone(PHONE_NUMBER);
 export const PHONE_TEL = `+${PHONE_NUMBER}`;
 export const CONTACT_EMAIL = "digitalfistpower@gmail.com";
